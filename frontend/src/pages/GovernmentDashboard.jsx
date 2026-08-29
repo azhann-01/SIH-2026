@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  BarChart3, TrendingUp, TrendingDown, Clock, AlertTriangle,
+  TrendingUp, TrendingDown, Clock, AlertTriangle,
   CheckCircle2, XCircle, Users, FileText, Activity, MapPin,
-  ChevronDown, Download, RefreshCw
+  Download, RefreshCw
 } from 'lucide-react'
 import { mockGovernmentStats } from '../data/mockData'
+import api from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts'
 
 const monthlyData = [
@@ -43,10 +44,10 @@ const processingData = [
 ]
 
 const bottlenecks = [
-  { name: 'Fire NOC', waiting: 12, avgTime: '18 days', expectedSLA: '10 days', variance: '+80%', status: 'critical' },
-  { name: 'Pollution Control NOC', waiting: 10, avgTime: '15 days', expectedSLA: '12 days', variance: '+25%', status: 'warning' },
-  { name: 'FSSAI License', waiting: 8, avgTime: '22 days', expectedSLA: '30 days', variance: '-27%', status: 'good' },
-  { name: 'Factory License', waiting: 5, avgTime: '8 days', expectedSLA: '10 days', variance: '-20%', status: 'good' },
+  { name: 'Fire NOC', waiting: 12, avgDays: 18, slaDays: 10 },
+  { name: 'Pollution Control NOC', waiting: 10, avgDays: 15, slaDays: 12 },
+  { name: 'FSSAI License', waiting: 8, avgDays: 22, slaDays: 30 },
+  { name: 'Factory License', waiting: 5, avgDays: 8, slaDays: 10 },
 ]
 
 const pieColors = ['#6366f1', '#22c55e', '#f59e0b', '#3b82f6', '#a855f7', '#94a3b8']
@@ -54,7 +55,61 @@ const pieColors = ['#6366f1', '#22c55e', '#f59e0b', '#3b82f6', '#a855f7', '#94a3
 const PIE_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#3b82f6', '#a855f7', '#ef4444', '#14b8a6']
 
 export default function GovernmentDashboard() {
-  const [timeRange, setTimeRange] = useState('month')
+  const [timeRange, setTimeRange] = useState('months')
+  const [refreshing, setRefreshing] = useState(false)
+  const [dataSource, setDataSource] = useState('demo')
+
+  // Member 5 integration hook: when the Spring Boot endpoint is ready,
+  // replace the mock response with GET /government/dashboard.
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      if (import.meta.env.VITE_USE_MOCK_DATA === 'false') {
+        await api.get('/government/dashboard')
+        setDataSource('live')
+      } else {
+        // Simulate a refresh while the backend is unavailable.
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setDataSource('demo')
+      }
+    } catch (error) {
+      console.error('Government dashboard refresh failed:', error)
+      setDataSource('demo')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  const handleExport = () => {
+    const rows = [
+      ['Approval Type', 'Waiting Applications', 'Average Processing Days', 'Expected SLA Days', 'Variance %', 'Status'],
+      ...bottlenecks.map(item => {
+        const variance = ((item.avgDays - item.slaDays) / item.slaDays) * 100
+        const status = variance > 20 ? 'Critical' : variance > 0 ? 'At Risk' : 'On Track'
+        return [item.name, item.waiting, item.avgDays, item.slaDays, `${variance.toFixed(0)}%`, status]
+      })
+    ]
+    const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'government-bottleneck-report.csv'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const processedBottlenecks = useMemo(() => bottlenecks.map(item => {
+    const variance = ((item.avgDays - item.slaDays) / item.slaDays) * 100
+    const status = variance > 20 ? 'critical' : variance > 0 ? 'warning' : 'good'
+    return { ...item, variance: `${variance >= 0 ? '+' : ''}${variance.toFixed(0)}%`, status }
+  }), [])
+
+  const biggestBottleneck = [...processedBottlenecks].sort((a, b) => {
+    const aVariance = parseFloat(a.variance)
+    const bVariance = parseFloat(b.variance)
+    return (bVariance + b.waiting) - (aVariance + a.waiting)
+  })[0]
 
   const statCards = [
     { label: 'Total Applications', value: mockGovernmentStats.totalApplications, change: '+12%', up: true, icon: FileText, color: 'text-primary-600 bg-primary-50' },
@@ -72,18 +127,19 @@ export default function GovernmentDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Government Dashboard</h1>
           <p className="text-sm text-slate-500 mt-0.5">Monitor industrial approvals, processing metrics, and system analytics</p>
+          <span className="inline-flex mt-2 items-center gap-1.5 text-[11px] font-medium text-slate-500"><span className={`w-1.5 h-1.5 rounded-full ${dataSource === 'live' ? 'bg-green-500' : 'bg-amber-500'}`} />{dataSource === 'live' ? 'Live data' : 'Demo data'} · Updated just now</span>
         </div>
         <div className="flex items-center gap-3">
           <select value={timeRange} onChange={e => setTimeRange(e.target.value)} className="px-3 py-2 rounded-lg border border-slate-200 text-sm">
+            <option value="months">Last 7 Months</option>
             <option value="week">This Week</option>
-            <option value="month">This Month</option>
             <option value="quarter">This Quarter</option>
             <option value="year">This Year</option>
           </select>
-          <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
-            <RefreshCw className="w-4 h-4" /> Refresh
+          <button onClick={handleRefresh} disabled={refreshing} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} /> {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
-          <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          <button onClick={handleExport} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
             <Download className="w-4 h-4" /> Export
           </button>
         </div>
@@ -244,6 +300,16 @@ export default function GovernmentDashboard() {
             <p className="text-xs text-slate-400 mt-0.5">Identify approval types causing delays in the pipeline</p>
           </div>
         </div>
+        <div className="px-5 py-4 bg-amber-50/50 border-b border-slate-100">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Current Biggest Bottleneck</p>
+              <p className="text-base font-bold text-slate-900 mt-1">{biggestBottleneck.name}</p>
+              <p className="text-sm text-slate-600 mt-0.5">{biggestBottleneck.waiting} applications waiting · {biggestBottleneck.avgDays} days average processing · {biggestBottleneck.variance} vs SLA</p>
+            </div>
+            <span className="inline-flex w-fit items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200"><AlertTriangle className="w-3 h-3" /> Needs Attention</span>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -257,21 +323,21 @@ export default function GovernmentDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {bottlenecks.map(item => (
+              {processedBottlenecks.map(item => (
                 <tr key={item.name} className="hover:bg-slate-50/50">
                   <td className="px-5 py-3.5 font-medium text-slate-900">{item.name}</td>
                   <td className="px-5 py-3.5 text-slate-600">{item.waiting} applications</td>
-                  <td className="px-5 py-3.5 text-slate-600">{item.avgTime}</td>
-                  <td className="px-5 py-3.5 text-slate-600">{item.expectedSLA}</td>
+                  <td className="px-5 py-3.5 text-slate-600">{item.avgDays} days</td>
+                  <td className="px-5 py-3.5 text-slate-600">{item.slaDays} days</td>
                   <td className="px-5 py-3.5">
                     <span className={`font-medium ${parseFloat(item.variance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                       {item.variance}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${item.status === 'critical' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
-                      {item.status === 'critical' ? <AlertTriangle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                      {item.status === 'critical' ? 'Critical' : 'On Track'}
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${item.status === 'critical' ? 'bg-red-50 text-red-700 border-red-200' : item.status === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                      {item.status === 'critical' ? <AlertTriangle className="w-3 h-3" /> : item.status === 'warning' ? <Clock className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
+                      {item.status === 'critical' ? 'Critical' : item.status === 'warning' ? 'At Risk' : 'On Track'}
                     </span>
                   </td>
                 </tr>
