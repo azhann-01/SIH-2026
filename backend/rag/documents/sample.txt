@@ -1,0 +1,7 @@
+Artificial Intelligence (AI) is a technology that enables computers and machines to perform tasks that normally require human intelligence.
+
+Machine Learning (ML) is a subset of Artificial Intelligence. It allows computers to learn patterns from data and make predictions or decisions without being explicitly programmed for every task.
+
+Deep Learning is a subset of Machine Learning that uses neural networks with multiple layers to learn complex patterns from large amounts of data.
+
+Artificial Intelligence is used in healthcare, education, agriculture, transportation, cybersecurity, and many other fields.
