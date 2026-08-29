@@ -1,9 +1,14 @@
 package com.codexminds.indusync.repository;
 
-import com.codexminds.indusync.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.codexminds.indusync.entity.User;
+
 public interface UserRepository extends JpaRepository<User, Long> {
+
     Optional<User> findByEmail(String email);
+
+    long countByRole(User.Role role);
 }
