@@ -1,0 +1,11 @@
+{
+    "project": {
+        "project_id": "PROJ001",
+        "industry": "Chemicals",
+        "location_type": "MIDC",
+        "project_stage": "Pre-establishment",
+        "generates_hazardous_waste": true,
+        "requires_fire_safety": true,
+        "has_started_production": false
+    }
+}

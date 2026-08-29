@@ -1,0 +1,120 @@
+{
+    "approvals": [
+        {
+            "approval_id": "APP001",
+            "approval_name": "Consent to Establish (CTE)",
+            "department": "Maharashtra Pollution Control Board (MPCB)",
+            "industry": "Chemicals",
+            "location_type": "Both",
+            "project_stage": "Pre-establishment",
+            "condition": "Required when the proposed industrial activity/process falls under MPCB consent requirements.",
+            "required_documents": [
+                "Site plan",
+                "Topographical map",
+                "Detailed process/layout plan",
+                "Process flow sheet",
+                "Details of proposed water pollution control devices",
+                "Details of proposed air pollution control devices"
+            ],
+            "depends_on": [],
+            "renewal_required": "No",
+            "source_name": "Maharashtra Pollution Control Board (MPCB)",
+            "source_url": "https://mpcb.gov.in/en/consentmgt/water-and-air-act/consent-info",
+            "last_verified": "2026-08-28",
+            "notes": "MPCB states that Consent to Establish must be obtained before actual establishment of an industry/activity that requires consent. Consent to Operate is a separate requirement."
+        },
+        {
+            "approval_id": "APP002",
+            "approval_name": "Consent to Operate (CTO)",
+            "department": "Maharashtra Pollution Control Board (MPCB)",
+            "industry": "Chemicals",
+            "location_type": "Both",
+            "project_stage": "Pre-operation",
+            "condition": "Required before actual commencement of production, including trial production, for industrial activities that require MPCB consent.",
+            "required_documents": [
+                "Detailed layout plan",
+                "Process flow sheet",
+                "Details of installed water pollution control devices",
+                "Details of installed air pollution control devices"
+            ],
+            "depends_on": [
+                "APP001"
+            ],
+            "renewal_required": "Yes",
+            "source_name": "Maharashtra Pollution Control Board (MPCB)",
+            "source_url": "https://www.mpcb.gov.in/en/faq",
+            "last_verified": "2026-08-28",
+            "notes": "Consent to Operate is required before actual commencement of production, including trial production."
+        },
+        {
+            "approval_id": "APP003",
+            "approval_name": "Hazardous Waste Authorization",
+            "department": "Maharashtra Pollution Control Board (MPCB)",
+            "industry": "Chemicals",
+            "location_type": "Both",
+            "project_stage": "Operation",
+            "condition": "Applicable when the industrial activity involves handling, generation, collection, storage, transportation, treatment, processing, recycling, recovery, utilization or disposal of hazardous and other waste covered by the applicable rules.",
+            "required_documents": [
+                "Application in prescribed format",
+                "Details of hazardous waste generated or handled",
+                "Details of storage and handling arrangements",
+                "Details of treatment, recycling, recovery or disposal arrangements"
+            ],
+            "depends_on": [
+                "APP002"
+            ],
+            "renewal_required": "As applicable",
+            "source_name": "Maharashtra Pollution Control Board (MPCB)",
+            "source_url": "https://www.mpcb.gov.in/en/waste-management/hazardous-waste",
+            "last_verified": "2026-08-28",
+            "notes": "MPCB provides authorization procedures under the Hazardous and Other Wastes (Management & Transboundary Movement) Rules, 2016. Applicability depends on the activity and hazardous-waste handling involved."
+        },
+        {
+            "approval_id": "APP004",
+            "approval_name": "Provisional / Final Fire Safety Approval",
+            "department": "Concerned Fire Authority / Special Planning Authority (e.g., MIDC)",
+            "industry": "Chemicals",
+            "location_type": "Both",
+            "project_stage": "Pre-operation",
+            "condition": "Applicable where the proposed industrial building, premises or activity falls under the applicable fire-safety requirements. The competent fire authority may depend on the local authority or special planning authority for the site.",
+            "required_documents": [
+                "Application",
+                "Architectural drawings",
+                "Block plan",
+                "Floor plan",
+                "Section and elevation plan",
+                "Process flow chart for industrial activity",
+                "Fire prevention and protection details",
+                "Raw material and finished goods details"
+            ],
+            "depends_on": [],
+            "renewal_required": "As applicable",
+            "source_name": "Maharashtra Fire & Emergency Services",
+            "source_url": "https://mahafireservice.gov.in/e-fire.php",
+            "last_verified": "2026-08-28",
+            "notes": "Maharashtra Fire & Emergency Services provides the e-approval process for fire safety approvals. The competent authority can depend on the local authority or special planning authority for the project site."
+        },
+        {
+            "approval_id": "APP005",
+            "approval_name": "Factory Plan Approval / Factory Licence",
+            "department": "Directorate of Industrial Safety and Health (DISH), Maharashtra",
+            "industry": "Chemicals",
+            "location_type": "Both",
+            "project_stage": "Pre-establishment",
+            "condition": "Applicable to establishments falling within the scope of the applicable factory and occupational safety requirements.",
+            "required_documents": [
+                "Factory plan/layout",
+                "Details of machinery and manufacturing process",
+                "Site/building information",
+                "Worker and employment details",
+                "Safety-related information, where applicable"
+            ],
+            "depends_on": [],
+            "renewal_required": "As applicable",
+            "source_name": "Directorate of Industrial Safety and Health (DISH), Maharashtra",
+            "source_url": "https://dish.maharashtra.gov.in/",
+            "last_verified": "2026-08-28",
+            "notes": "Applicability depends on whether the establishment falls within the scope of the applicable factory legislation and safety requirements."
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+  "rules": [
+    {
+      "rule_id": "RULE001",
+      "industry": "Chemicals",
+      "project_stage": "Pre-establishment",
+      "approval_id": "APP001"
+    },
+    {
+      "rule_id": "RULE002",
+      "requires_fire_safety": true,
+      "approval_id": "APP004"
+    },
+    {
+      "rule_id": "RULE003",
+      "industry": "Chemicals",
+      "project_stage": "Pre-operation",
+      "approval_id": "APP002"
+    },
+    {
+      "rule_id": "RULE004",
+      "generates_hazardous_waste": true,
+      "project_stage": "Operation",
+      "approval_id": "APP003"
+    },
+    {
+      "rule_id": "RULE005",
+      "industry": "Chemicals",
+      "project_stage": "Pre-establishment",
+      "approval_id": "APP005"
+    }
+  ]
+}
