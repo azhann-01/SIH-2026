@@ -13,7 +13,7 @@ import GovernmentDashboard from './pages/GovernmentDashboard'
 import Projects from './pages/Projects'
 import Schemes from './pages/Schemes'
 import AIAssistent from './pages/AIAssistent'
-
+import NewApplication from './pages/NewApplication'
 
 function App() {
   return (
@@ -29,7 +29,10 @@ function App() {
 
       {/* Main Application Pages */}
       <Route path="/dashboard" element={<Dashboard />} />
-
+      <Route
+  path="/new-application"
+  element={<NewApplication />}
+/>
       <Route
         path="/approval-roadmap"
         element={<ApprovalRoadmap />}

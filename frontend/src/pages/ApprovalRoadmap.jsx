@@ -1,6 +1,4 @@
-import { useState, useMemo } from 'react'
-import { mockApprovals, statusColors, statusLabels } from '../data/mockData'
-
+import { useEffect, useMemo, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -20,62 +18,89 @@ import {
   XCircle,
   Filter,
   Search,
+  RefreshCw,
 } from 'lucide-react'
+
+import api from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 
 const statusIcons = {
-  approved: CheckCircle2,
-  in_progress: Clock,
-  pending: AlertTriangle,
-  rejected: XCircle,
+  APPROVED: CheckCircle2,
+  IN_REVIEW: Clock,
+  SUBMITTED: AlertTriangle,
+  REJECTED: XCircle,
 }
 
 
-const statusNodeColors = {
-  approved: {
+const statusColors = {
+  APPROVED: {
     bg: '#dcfce7',
     border: '#22c55e',
     text: '#15803d',
   },
 
-  in_progress: {
+  IN_REVIEW: {
     bg: '#dbeafe',
     border: '#3b82f6',
     text: '#1d4ed8',
   },
 
-  pending: {
+  SUBMITTED: {
     bg: '#fef3c7',
     border: '#f59e0b',
     text: '#92400e',
   },
 
-  not_started: {
-    bg: '#f1f5f9',
-    border: '#94a3b8',
-    text: '#475569',
+  REJECTED: {
+    bg: '#fee2e2',
+    border: '#ef4444',
+    text: '#b91c1c',
   },
 }
 
 
+function getStatusLabel(status) {
+  switch (status) {
+    case 'APPROVED':
+      return 'Approved'
+
+    case 'IN_REVIEW':
+      return 'In Review'
+
+    case 'REJECTED':
+      return 'Rejected'
+
+    case 'SUBMITTED':
+      return 'Submitted'
+
+    default:
+      return status || 'Unknown'
+  }
+}
+
+
 function ApprovalNode({ data }) {
+
   const colors =
-    statusNodeColors[data.status] || statusNodeColors.pending
+    statusColors[data.status] || statusColors.SUBMITTED
 
   const Icon =
     statusIcons[data.status] || AlertTriangle
 
   return (
     <div
-      className="bg-white rounded-xl shadow-lg border-2 min-w-[220px]"
+      className="bg-white rounded-xl shadow-lg border-2 min-w-[230px]"
       style={{ borderColor: colors.border }}
     >
-      {/* Header */}
+
       <div
         className="px-4 py-3 rounded-t-[10px]"
         style={{ backgroundColor: colors.bg }}
       >
+
         <div className="flex items-center gap-2">
+
           <Icon
             className="w-4 h-4"
             style={{ color: colors.text }}
@@ -85,64 +110,62 @@ function ApprovalNode({ data }) {
             className="text-sm font-semibold"
             style={{ color: colors.text }}
           >
-            {data.approval}
+            {data.approvalName}
           </span>
+
         </div>
+
       </div>
 
-      {/* Body */}
+
       <div className="p-4">
+
         <p className="text-xs text-slate-500 mb-2">
-          {data.department}
+          Application #{data.id}
         </p>
 
-        <div className="flex flex-wrap gap-1.5">
+        <span
+          className="inline-flex text-[10px] px-2 py-1 rounded-full font-medium"
+          style={{
+            backgroundColor: colors.bg,
+            color: colors.text,
+          }}
+        >
+          {getStatusLabel(data.status)}
+        </span>
 
-          {/* SLA */}
-          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
-            {data.sla}
-          </span>
 
-          {/* Risk */}
-          <span
-            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-              data.riskFactors === 'High'
-                ? 'bg-red-50 text-red-600'
-                : data.riskFactors === 'Medium'
-                ? 'bg-amber-50 text-amber-600'
-                : 'bg-green-50 text-green-600'
-            }`}
-          >
-            {data.riskFactors} Risk
-          </span>
+        {data.submittedAt && (
 
-          {/* Processing Stage */}
-          <span className="text-[10px] bg-primary-50 text-primary-600 px-2 py-0.5 rounded-full font-medium">
-            {data.processingStage}
-          </span>
-        </div>
+          <p className="text-[10px] text-slate-400 mt-3">
+            Submitted:{' '}
+            {new Date(data.submittedAt).toLocaleDateString()}
+          </p>
 
-        {/* Dependencies */}
-        {data.dependencies &&
-          data.dependencies.length > 0 && (
-            <div className="mt-3 pt-2 border-t border-slate-100">
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-1">
-                Depends on
-              </p>
+        )}
 
-              {data.dependencies.map((dep, i) => (
-                <span
-                  key={i}
-                  className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded mr-1 mb-0.5 inline-block border border-amber-100"
-                >
-                  {dep}
-                </span>
-              ))}
-            </div>
-          )}
+
+        {data.slaDeadline && (
+
+          <p className="text-[10px] text-slate-400 mt-1">
+            SLA:{' '}
+            {new Date(data.slaDeadline).toLocaleDateString()}
+          </p>
+
+        )}
+
+
+        {data.remarks && (
+
+          <p className="text-[10px] text-slate-500 mt-2">
+            {data.remarks}
+          </p>
+
+        )}
+
       </div>
 
-      {/* React Flow Handles */}
+
       <Handle
         type="target"
         position={Position.Top}
@@ -154,6 +177,7 @@ function ApprovalNode({ data }) {
         position={Position.Bottom}
         className="!w-3 !h-3 !bg-slate-400"
       />
+
     </div>
   )
 }
@@ -165,230 +189,456 @@ const nodeTypes = {
 
 
 export default function ApprovalRoadmap() {
-  const [selectedApproval, setSelectedApproval] =
-    useState(null)
 
-  const [filterStatus, setFilterStatus] =
-    useState('all')
+  const { user } = useAuth()
 
-  const [searchQuery, setSearchQuery] =
-    useState('')
+  const [applications, setApplications] = useState([])
+
+  const [project, setProject] = useState(null)
+
+  const [loading, setLoading] = useState(true)
+
+  const [refreshing, setRefreshing] = useState(false)
+
+  const [error, setError] = useState('')
+
+  const [filterStatus, setFilterStatus] = useState('all')
+
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const [selectedApproval, setSelectedApproval] = useState(null)
 
 
-  /* -----------------------------
-     Filter Approvals
-  ----------------------------- */
+  /*
+   * Load user's project and applications
+   */
 
-  const filteredApprovals = useMemo(() => {
-    return mockApprovals.filter((a) => {
+  const fetchApplications = async () => {
+
+    try {
+
+      setError('')
+
+      if (!user?.id) {
+        setError('User information not available. Please login again.')
+        return
+      }
+
+
+      /*
+       * First get dashboard.
+       * Dashboard already returns the user's projects.
+       */
+
+      const dashboardResponse =
+        await api.get(`/dashboard/${user.id}`)
+
+      const projects =
+        dashboardResponse.data?.projects || []
+
+
+      if (projects.length === 0) {
+
+        setProject(null)
+        setApplications([])
+
+        return
+      }
+
+
+      const activeProject = projects[0]
+
+      setProject(activeProject)
+
+
+      /*
+       * Now get REAL applications from MySQL
+       */
+
+      const applicationResponse =
+        await api.get(
+          `/application/project/${activeProject.id}`
+        )
+
+
+      setApplications(
+        applicationResponse.data || []
+      )
+
+    } catch (err) {
+
+      console.error(
+        'Failed to load applications:',
+        err
+      )
+
+      setError(
+        err.response?.data ||
+        err.message ||
+        'Unable to load applications'
+      )
+
+    } finally {
+
+      setLoading(false)
+      setRefreshing(false)
+
+    }
+  }
+
+
+  useEffect(() => {
+
+    fetchApplications()
+
+  }, [user?.id])
+
+
+  const handleRefresh = async () => {
+
+    setRefreshing(true)
+
+    await fetchApplications()
+
+  }
+
+
+  /*
+   * Filter applications
+   */
+
+  const filteredApplications = useMemo(() => {
+
+    return applications.filter(application => {
 
       if (
         filterStatus !== 'all' &&
-        a.status !== filterStatus
+        application.status !== filterStatus
       ) {
         return false
       }
 
-      if (
-        searchQuery &&
-        !a.approval
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) &&
-        !a.department
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      ) {
-        return false
+
+      if (searchQuery) {
+
+        const query =
+          searchQuery.toLowerCase()
+
+        return (
+          application.approvalName
+            ?.toLowerCase()
+            .includes(query) ||
+
+          application.remarks
+            ?.toLowerCase()
+            .includes(query)
+        )
       }
+
 
       return true
+
     })
-  }, [filterStatus, searchQuery])
+
+  }, [
+    applications,
+    filterStatus,
+    searchQuery
+  ])
 
 
-  /* -----------------------------
-     Build React Flow Nodes + Edges
-  ----------------------------- */
+  /*
+   * Build React Flow nodes
+   */
 
-  const { nodes, edges } = useMemo(() => {
+  const nodes = useMemo(() => {
 
-    const approvalNodes =
-      filteredApprovals.map((approval, index) => {
+    return filteredApplications.map(
+      (application, index) => {
 
-        const cols = 3
+        const cols = 2
 
-        const row = Math.floor(index / cols)
-        const col = index % cols
+        const row =
+          Math.floor(index / cols)
 
-        const x = 100 + col * 300
-        const y = row * 280
+        const col =
+          index % cols
+
 
         return {
-          id: String(approval.id),
+
+          id: String(application.id),
 
           type: 'approvalNode',
 
           position: {
-            x,
-            y,
+            x: 100 + col * 350,
+            y: row * 260,
           },
 
-          data: approval,
+          data: application,
+
         }
-      })
 
-
-    const flowEdges = []
-
-
-    filteredApprovals.forEach((approval) => {
-
-      if (!approval.dependencies) {
-        return
       }
+    )
 
-      approval.dependencies.forEach((depName) => {
+  }, [filteredApplications])
 
-        const depApproval =
-          filteredApprovals.find(
-            (a) => a.approval === depName
-          )
 
-        if (depApproval) {
+  /*
+   * Connect applications sequentially.
+   *
+   * Your current backend does not store
+   * application dependencies, so we cannot
+   * invent dependency relationships.
+   */
 
-          const isInProgress =
-            approval.status === 'in_progress'
+  const edges = useMemo(() => {
 
-          flowEdges.push({
-            id: `${depApproval.id}-${approval.id}`,
+    const result = []
 
-            source: String(depApproval.id),
+    for (
+      let i = 0;
+      i < filteredApplications.length - 1;
+      i++
+    ) {
 
-            target: String(approval.id),
+      const current =
+        filteredApplications[i]
 
-            type: 'smoothstep',
+      const next =
+        filteredApplications[i + 1]
 
-            animated: isInProgress,
 
-            style: {
-              stroke: isInProgress
-                ? '#6366f1'
-                : '#cbd5e1',
+      result.push({
 
-              strokeWidth: 2,
-            },
+        id: `${current.id}-${next.id}`,
 
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
+        source: String(current.id),
 
-              color: isInProgress
-                ? '#6366f1'
-                : '#cbd5e1',
-            },
-          })
-        }
+        target: String(next.id),
+
+        type: 'smoothstep',
+
+        animated:
+          current.status === 'IN_REVIEW',
+
+        style: {
+          stroke:
+            current.status === 'IN_REVIEW'
+              ? '#6366f1'
+              : '#cbd5e1',
+
+          strokeWidth: 2,
+        },
+
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+
+          color:
+            current.status === 'IN_REVIEW'
+              ? '#6366f1'
+              : '#cbd5e1',
+        },
+
       })
-    })
 
-
-    return {
-      nodes: approvalNodes,
-      edges: flowEdges,
     }
 
-  }, [filteredApprovals])
+    return result
+
+  }, [filteredApplications])
 
 
-  /* -----------------------------
-     Overview Statistics
-  ----------------------------- */
+  /*
+   * Statistics
+   */
 
-  const overviewStats = {
-    total: mockApprovals.length,
+  const total =
+    applications.length
 
-    approved: mockApprovals.filter(
-      (a) => a.status === 'approved'
-    ).length,
+  const approved =
+    applications.filter(
+      a => a.status === 'APPROVED'
+    ).length
 
-    inProgress: mockApprovals.filter(
-      (a) => a.status === 'in_progress'
-    ).length,
+  const inReview =
+    applications.filter(
+      a => a.status === 'IN_REVIEW'
+    ).length
 
-    pending: mockApprovals.filter(
-      (a) => a.status === 'pending'
-    ).length,
+  const submitted =
+    applications.filter(
+      a => a.status === 'SUBMITTED'
+    ).length
+
+  const rejected =
+    applications.filter(
+      a => a.status === 'REJECTED'
+    ).length
+
+
+  /*
+   * Loading
+   */
+
+  if (loading) {
+
+    return (
+
+      <div className="flex items-center justify-center min-h-[400px]">
+
+        <div className="text-center">
+
+          <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4" />
+
+          <p className="text-sm text-slate-500">
+            Loading applications...
+          </p>
+
+        </div>
+
+      </div>
+
+    )
+
   }
 
 
-  /* -----------------------------
-     UI
-  ----------------------------- */
-
   return (
+
     <div className="space-y-6">
+
 
       {/* Header */}
 
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">
-          Approval Roadmap
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-        <p className="text-sm text-slate-500 mt-0.5">
-          Visualize all approvals, dependencies, and
-          timelines for your projects
-        </p>
+        <div>
+
+          <h1 className="text-2xl font-bold text-slate-900">
+            Approval Roadmap
+          </h1>
+
+          <p className="text-sm text-slate-500 mt-0.5">
+            Track your real approval applications and their status
+          </p>
+
+          {project && (
+
+            <p className="text-xs text-green-600 mt-2">
+              ● Live data · {project.name}
+            </p>
+
+          )}
+
+        </div>
+
+
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        >
+
+          <RefreshCw
+            className={`w-4 h-4 ${
+              refreshing
+                ? 'animate-spin'
+                : ''
+            }`}
+          />
+
+          {refreshing
+            ? 'Refreshing...'
+            : 'Refresh'}
+
+        </button>
+
       </div>
 
 
-      {/* Overview Stats */}
+      {/* Error */}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {error && (
 
-        {[
-          {
-            label: 'Total Approvals',
-            value: overviewStats.total,
-            color:
-              'bg-primary-50 text-primary-600 border-primary-100',
-          },
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+          {error}
+        </div>
 
-          {
-            label: 'Approved',
-            value: overviewStats.approved,
-            color:
-              'bg-green-50 text-green-600 border-green-100',
-          },
+      )}
 
-          {
-            label: 'In Progress',
-            value: overviewStats.inProgress,
-            color:
-              'bg-blue-50 text-blue-600 border-blue-100',
-          },
 
-          {
-            label: 'Pending',
-            value: overviewStats.pending,
-            color:
-              'bg-amber-50 text-amber-600 border-amber-100',
-          },
-        ].map(({ label, value, color }) => (
+      {/* Statistics */}
 
-          <div
-            key={label}
-            className={`rounded-xl border p-4 ${color}`}
-          >
-            <p className="text-2xl font-bold">
-              {value}
-            </p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
 
-            <p className="text-xs font-medium opacity-70 mt-0.5">
-              {label}
-            </p>
-          </div>
 
-        ))}
+        <div className="rounded-xl border border-primary-100 bg-primary-50 p-4">
+
+          <p className="text-2xl font-bold text-primary-600">
+            {total}
+          </p>
+
+          <p className="text-xs text-primary-600 mt-1">
+            Total
+          </p>
+
+        </div>
+
+
+        <div className="rounded-xl border border-green-100 bg-green-50 p-4">
+
+          <p className="text-2xl font-bold text-green-600">
+            {approved}
+          </p>
+
+          <p className="text-xs text-green-600 mt-1">
+            Approved
+          </p>
+
+        </div>
+
+
+        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+
+          <p className="text-2xl font-bold text-blue-600">
+            {inReview}
+          </p>
+
+          <p className="text-xs text-blue-600 mt-1">
+            In Review
+          </p>
+
+        </div>
+
+
+        <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+
+          <p className="text-2xl font-bold text-amber-600">
+            {submitted}
+          </p>
+
+          <p className="text-xs text-amber-600 mt-1">
+            Submitted
+          </p>
+
+        </div>
+
+
+        <div className="rounded-xl border border-red-100 bg-red-50 p-4">
+
+          <p className="text-2xl font-bold text-red-600">
+            {rejected}
+          </p>
+
+          <p className="text-xs text-red-600 mt-1">
+            Rejected
+          </p>
+
+        </div>
+
       </div>
 
 
@@ -396,7 +646,6 @@ export default function ApprovalRoadmap() {
 
       <div className="bg-white rounded-xl border border-slate-100 p-4 flex flex-col sm:flex-row gap-3">
 
-        {/* Search */}
 
         <div className="relative flex-1">
 
@@ -404,44 +653,48 @@ export default function ApprovalRoadmap() {
 
           <input
             value={searchQuery}
-            onChange={(e) =>
+            onChange={e =>
               setSearchQuery(e.target.value)
             }
-            placeholder="Search approvals or departments..."
+            placeholder="Search applications..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
 
         </div>
 
 
-        {/* Status Filter */}
-
         <div className="flex items-center gap-2">
 
-          <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+          <Filter className="w-4 h-4 text-slate-400" />
 
           <select
             value={filterStatus}
-            onChange={(e) =>
+            onChange={e =>
               setFilterStatus(e.target.value)
             }
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-3 py-2 rounded-lg border border-slate-200 text-sm"
           >
+
             <option value="all">
               All Status
             </option>
 
-            <option value="approved">
+            <option value="SUBMITTED">
+              Submitted
+            </option>
+
+            <option value="IN_REVIEW">
+              In Review
+            </option>
+
+            <option value="APPROVED">
               Approved
             </option>
 
-            <option value="in_progress">
-              In Progress
+            <option value="REJECTED">
+              Rejected
             </option>
 
-            <option value="pending">
-              Pending
-            </option>
           </select>
 
         </div>
@@ -449,374 +702,366 @@ export default function ApprovalRoadmap() {
       </div>
 
 
-      {/* Approval List + Flow */}
+      {/* No project */}
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      {!project && (
 
-        {/* Approval List */}
+        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
 
-        <div className="lg:col-span-1 bg-white rounded-xl border border-slate-100 overflow-hidden">
+          <FileTextIcon />
 
-          <div className="p-4 border-b border-slate-100">
+          <h3 className="font-semibold text-slate-800 mt-3">
+            No project found
+          </h3>
 
-            <h3 className="font-semibold text-slate-900 text-sm">
-              All Approvals
-            </h3>
-
-            <p className="text-xs text-slate-400 mt-0.5">
-              {filteredApprovals.length} records
-            </p>
-
-          </div>
-
-
-          <div className="max-h-[520px] overflow-y-auto divide-y divide-slate-50">
-
-            {filteredApprovals.map((approval) => {
-
-              const StatusIcon =
-                statusIcons[approval.status] ||
-                AlertTriangle
-
-              return (
-
-                <button
-                  key={approval.id}
-                  onClick={() =>
-                    setSelectedApproval(
-                      selectedApproval?.id === approval.id
-                        ? null
-                        : approval
-                    )
-                  }
-                  className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${
-                    selectedApproval?.id === approval.id
-                      ? 'bg-primary-50'
-                      : ''
-                  }`}
-                >
-
-                  <div className="flex items-start gap-3">
-
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        approval.status === 'approved'
-                          ? 'bg-green-100'
-                          : approval.status ===
-                            'in_progress'
-                          ? 'bg-blue-100'
-                          : 'bg-amber-100'
-                      }`}
-                    >
-
-                      <StatusIcon
-                        className={`w-4 h-4 ${
-                          approval.status === 'approved'
-                            ? 'text-green-600'
-                            : approval.status ===
-                              'in_progress'
-                            ? 'text-blue-600'
-                            : 'text-amber-600'
-                        }`}
-                      />
-
-                    </div>
-
-
-                    <div className="flex-1 min-w-0">
-
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {approval.approval}
-                      </p>
-
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {approval.department}
-                      </p>
-
-
-                      <div className="flex items-center gap-2 mt-2">
-
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
-                            statusColors[
-                              approval.status
-                            ] || ''
-                          }`}
-                        >
-                          {statusLabels[
-                            approval.status
-                          ] || approval.status}
-                        </span>
-
-                        <span className="text-[10px] text-slate-400">
-                          {approval.sla}
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </button>
-
-              )
-            })}
-
-          </div>
+          <p className="text-sm text-slate-500 mt-1">
+            Create a project before submitting applications.
+          </p>
 
         </div>
 
-
-        {/* Details + Graph */}
-
-        <div className="lg:col-span-2 space-y-4">
-
-          {/* Selected Approval */}
-
-          {selectedApproval && (
-
-            <div className="bg-white rounded-xl border border-slate-100 p-5">
-
-              <div className="flex items-start justify-between mb-4">
-
-                <div>
-
-                  <h3 className="font-semibold text-slate-900">
-                    {selectedApproval.approval}
-                  </h3>
-
-                  <p className="text-sm text-slate-500 mt-0.5">
-                    {selectedApproval.department}
-                  </p>
-
-                </div>
+      )}
 
 
-                <span
-                  className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${
-                    statusColors[
-                      selectedApproval.status
-                    ] || ''
-                  }`}
-                >
-                  {statusLabels[
-                    selectedApproval.status
-                  ] || selectedApproval.status}
-                </span>
+      {/* No applications */}
 
-              </div>
+      {project && applications.length === 0 && (
 
+        <div className="bg-white rounded-xl border border-slate-100 p-10 text-center">
 
-              {/* Summary */}
+          <FileTextIcon />
 
-              <div className="grid sm:grid-cols-3 gap-3 mb-5">
+          <h3 className="font-semibold text-slate-800 mt-3">
+            No applications yet
+          </h3>
 
-                <div className="p-3 rounded-lg bg-slate-50">
+          <p className="text-sm text-slate-500 mt-1">
+            Applications submitted for this project will appear here.
+          </p>
 
-                  <p className="text-xs text-slate-500">
-                    SLA Timeline
-                  </p>
+        </div>
 
-                  <p className="text-sm font-semibold text-slate-900">
-                    {selectedApproval.sla}
-                  </p>
-
-                </div>
+      )}
 
 
-                <div className="p-3 rounded-lg bg-slate-50">
+      {/* Applications */}
 
-                  <p className="text-xs text-slate-500">
-                    Risk Level
-                  </p>
+      {applications.length > 0 && (
 
-                  <p
-                    className={`text-sm font-semibold ${
-                      selectedApproval.riskFactors ===
-                      'High'
-                        ? 'text-red-600'
-                        : selectedApproval.riskFactors ===
-                          'Medium'
-                        ? 'text-amber-600'
-                        : 'text-green-600'
-                    }`}
-                  >
-                    {selectedApproval.riskFactors}
-                  </p>
-
-                </div>
+        <div className="grid lg:grid-cols-3 gap-6">
 
 
-                <div className="p-3 rounded-lg bg-slate-50">
-
-                  <p className="text-xs text-slate-500">
-                    Renewal
-                  </p>
-
-                  <p className="text-sm font-semibold text-slate-900">
-                    {selectedApproval.renewal}
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              {/* Timeline */}
-
-              <div>
-
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">
-                  Processing Timeline
-                </h4>
-
-
-                <div className="relative">
-
-                  {selectedApproval.timeline?.map(
-                    (item, i) => (
-
-                      <div
-                        key={i}
-                        className="flex gap-3 pb-4 last:pb-0"
-                      >
-
-                        <div className="flex flex-col items-center">
-
-                          <div
-                            className={`w-3 h-3 rounded-full border-2 ${
-                              item.status ===
-                              'completed'
-                                ? 'bg-green-500 border-green-500'
-                                : item.status ===
-                                  'in_progress'
-                                ? 'bg-blue-500 border-blue-500 animate-pulse'
-                                : 'bg-slate-200 border-slate-300'
-                            }`}
-                          />
-
-                          {i <
-                            selectedApproval.timeline
-                              .length -
-                              1 && (
-
-                            <div
-                              className={`w-0.5 h-8 ${
-                                item.status ===
-                                'completed'
-                                  ? 'bg-green-300'
-                                  : 'bg-slate-200'
-                              }`}
-                            />
-
-                          )}
-
-                        </div>
-
-
-                        <div className="flex-1">
-
-                          <p className="text-sm font-medium text-slate-700">
-                            {item.stage}
-                          </p>
-
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            {item.date}
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                    )
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          )}
-
-
-          {/* Dependency Graph */}
+          {/* List */}
 
           <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
 
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="p-4 border-b border-slate-100">
 
               <h3 className="font-semibold text-slate-900 text-sm">
-                Approval Dependency Graph
+                Applications
               </h3>
 
-
-              <div className="flex items-center gap-3 text-xs">
-
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                  Approved
-                </span>
-
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                  In Progress
-                </span>
-
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  Pending
-                </span>
-
-              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {filteredApplications.length} records
+              </p>
 
             </div>
 
 
-            {/* React Flow */}
+            <div className="max-h-[520px] overflow-y-auto divide-y divide-slate-50">
 
-            <div className="h-[400px]">
+              {filteredApplications.map(application => {
 
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                nodeTypes={nodeTypes}
-                fitView
-                proOptions={{
-                  hideAttribution: true,
-                }}
-                minZoom={0.3}
-                maxZoom={1.5}
-              >
+                const Icon =
+                  statusIcons[
+                    application.status
+                  ] || AlertTriangle
 
-                <Background
-                  color="#e2e8f0"
-                  gap={20}
-                  size={1}
-                />
+                const colors =
+                  statusColors[
+                    application.status
+                  ] || statusColors.SUBMITTED
 
-                <Controls
-                  className="!bg-white !border-slate-200 !shadow-lg"
-                />
 
-                <MiniMap
-                  nodeStrokeColor={(n) =>
-                    statusNodeColors[
-                      n.data?.status
-                    ]?.border || '#cbd5e1'
-                  }
+                return (
 
-                  nodeColor={(n) =>
-                    statusNodeColors[
-                      n.data?.status
-                    ]?.bg || '#f1f5f9'
-                  }
+                  <button
+                    key={application.id}
+                    onClick={() =>
+                      setSelectedApproval(
+                        selectedApproval?.id === application.id
+                          ? null
+                          : application
+                      )
+                    }
+                    className={`w-full text-left p-4 hover:bg-slate-50 ${
+                      selectedApproval?.id === application.id
+                        ? 'bg-primary-50'
+                        : ''
+                    }`}
+                  >
 
-                  className="!bg-white !rounded-lg !shadow-lg"
-                />
+                    <div className="flex gap-3">
 
-              </ReactFlow>
+                      <div
+                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          backgroundColor:
+                            colors.bg,
+                        }}
+                      >
+
+                        <Icon
+                          className="w-4 h-4"
+                          style={{
+                            color:
+                              colors.text,
+                          }}
+                        />
+
+                      </div>
+
+
+                      <div className="min-w-0">
+
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {application.approvalName}
+                        </p>
+
+                        <p className="text-xs text-slate-400 mt-1">
+                          Application #{application.id}
+                        </p>
+
+                        <span
+                          className="inline-flex mt-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                          style={{
+                            backgroundColor:
+                              colors.bg,
+                            color:
+                              colors.text,
+                          }}
+                        >
+                          {getStatusLabel(
+                            application.status
+                          )}
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </button>
+
+                )
+
+              })}
+
+            </div>
+
+          </div>
+
+
+          {/* Right */}
+
+          <div className="lg:col-span-2 space-y-4">
+
+
+            {/* Selected application */}
+
+            {selectedApproval && (
+
+              <div className="bg-white rounded-xl border border-slate-100 p-5">
+
+                <div className="flex items-start justify-between">
+
+                  <div>
+
+                    <h3 className="font-semibold text-slate-900">
+                      {selectedApproval.approvalName}
+                    </h3>
+
+                    <p className="text-xs text-slate-400 mt-1">
+                      Application #{selectedApproval.id}
+                    </p>
+
+                  </div>
+
+
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-medium"
+                    style={{
+                      backgroundColor:
+                        statusColors[
+                          selectedApproval.status
+                        ]?.bg,
+
+                      color:
+                        statusColors[
+                          selectedApproval.status
+                        ]?.text,
+                    }}
+                  >
+                    {getStatusLabel(
+                      selectedApproval.status
+                    )}
+                  </span>
+
+                </div>
+
+
+                <div className="grid sm:grid-cols-3 gap-3 mt-5">
+
+
+                  <div className="p-3 rounded-lg bg-slate-50">
+
+                    <p className="text-xs text-slate-500">
+                      Submitted
+                    </p>
+
+                    <p className="text-sm font-semibold text-slate-900 mt-1">
+
+                      {selectedApproval.submittedAt
+                        ? new Date(
+                            selectedApproval.submittedAt
+                          ).toLocaleDateString()
+                        : '—'}
+
+                    </p>
+
+                  </div>
+
+
+                  <div className="p-3 rounded-lg bg-slate-50">
+
+                    <p className="text-xs text-slate-500">
+                      SLA Deadline
+                    </p>
+
+                    <p className="text-sm font-semibold text-slate-900 mt-1">
+
+                      {selectedApproval.slaDeadline
+                        ? new Date(
+                            selectedApproval.slaDeadline
+                          ).toLocaleDateString()
+                        : '—'}
+
+                    </p>
+
+                  </div>
+
+
+                  <div className="p-3 rounded-lg bg-slate-50">
+
+                    <p className="text-xs text-slate-500">
+                      Project
+                    </p>
+
+                    <p className="text-sm font-semibold text-slate-900 mt-1">
+                      {project?.name || '—'}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                {selectedApproval.remarks && (
+
+                  <div className="mt-4 p-3 rounded-lg bg-slate-50">
+
+                    <p className="text-xs text-slate-500">
+                      Remarks
+                    </p>
+
+                    <p className="text-sm text-slate-700 mt-1">
+                      {selectedApproval.remarks}
+                    </p>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            )}
+
+
+            {/* Graph */}
+
+            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+
+                <div>
+
+                  <h3 className="font-semibold text-slate-900 text-sm">
+                    Application Flow
+                  </h3>
+
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Live applications from your project
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div className="h-[450px]">
+
+                {filteredApplications.length === 0 ? (
+
+                  <div className="h-full flex items-center justify-center">
+
+                    <p className="text-sm text-slate-400">
+                      No applications match your filter.
+                    </p>
+
+                  </div>
+
+                ) : (
+
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    proOptions={{
+                      hideAttribution: true,
+                    }}
+                    minZoom={0.3}
+                    maxZoom={1.5}
+                  >
+
+                    <Background
+                      color="#e2e8f0"
+                      gap={20}
+                      size={1}
+                    />
+
+                    <Controls />
+
+                    <MiniMap
+                      nodeStrokeColor={node =>
+                        statusColors[
+                          node.data?.status
+                        ]?.border ||
+                        '#cbd5e1'
+                      }
+
+                      nodeColor={node =>
+                        statusColors[
+                          node.data?.status
+                        ]?.bg ||
+                        '#f1f5f9'
+                      }
+                    />
+
+                  </ReactFlow>
+
+                )}
+
+              </div>
 
             </div>
 
@@ -824,8 +1069,47 @@ export default function ApprovalRoadmap() {
 
         </div>
 
-      </div>
+      )}
 
     </div>
+
+  )
+}
+
+
+/*
+ * Small icon component so the page doesn't
+ * need another dependency.
+ */
+
+function FileTextIcon() {
+
+  return (
+
+    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+
+        <polyline points="14 2 14 8 20 8" />
+
+        <line x1="16" y1="13" x2="8" y2="13" />
+
+        <line x1="16" y1="17" x2="8" y2="17" />
+
+        <polyline points="10 9 9 9 8 9" />
+
+      </svg>
+
+    </div>
+
   )
 }
