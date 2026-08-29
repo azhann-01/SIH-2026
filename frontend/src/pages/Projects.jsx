@@ -31,7 +31,15 @@ export default function Projects() {
     location: '',
     investmentAmount: '',
     numberOfEmployees: '',
-    landType: ''
+    landType: '',
+
+    // Rules Engine fields
+    industry: '',
+    projectStage: 'Pre-establishment',
+    locationType: '',
+    generatesHazardousWaste: false,
+    requiresFireSafety: false,
+    hasStartedProduction: false
   })
 
   // =========================
@@ -133,7 +141,15 @@ export default function Projects() {
         location: form.location,
         investmentAmount: Number(form.investmentAmount),
         numberOfEmployees: Number(form.numberOfEmployees),
-        landType: form.landType
+        landType: form.landType,
+
+        // Rules Engine fields
+        industry: form.industry,
+        projectStage: form.projectStage,
+        locationType: form.locationType,
+        generatesHazardousWaste: form.generatesHazardousWaste,
+        requiresFireSafety: form.requiresFireSafety,
+        hasStartedProduction: form.hasStartedProduction
       }
 
       await api.post(
@@ -148,7 +164,14 @@ export default function Projects() {
         location: '',
         investmentAmount: '',
         numberOfEmployees: '',
-        landType: ''
+        landType: '',
+
+        industry: '',
+        projectStage: 'Pre-establishment',
+        locationType: '',
+        generatesHazardousWaste: false,
+        requiresFireSafety: false,
+        hasStartedProduction: false
       })
 
       setShowForm(false)
@@ -228,8 +251,11 @@ export default function Projects() {
           onClick={() => setShowForm(true)}
           className="inline-flex items-center gap-1.5 bg-primary-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-700"
         >
+
           <Plus className="w-4 h-4" />
+
           New Project
+
         </button>
 
       </div>
@@ -287,8 +313,11 @@ export default function Projects() {
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-700"
           >
+
             <Plus className="w-4 h-4" />
+
             Create Project
+
           </button>
 
         </div>
@@ -421,6 +450,31 @@ export default function Projects() {
                 )}
 
 
+                {/* Compliance Details */}
+
+                {project.industry && (
+
+                  <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
+
+                    <p className="text-xs text-blue-600 font-medium">
+                      Compliance Profile
+                    </p>
+
+                    <p className="text-sm font-semibold text-slate-900 mt-1">
+                      {project.industry}
+                    </p>
+
+                    <p className="text-xs text-slate-500 mt-1">
+                      {project.projectStage || 'Stage not specified'}
+                      {' • '}
+                      {project.locationType || 'Location type not specified'}
+                    </p>
+
+                  </div>
+
+                )}
+
+
                 {/* Footer */}
 
                 <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
@@ -515,7 +569,7 @@ export default function Projects() {
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="e.g. Food Processing Plant"
+                  placeholder="e.g. Chemical Manufacturing Plant"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
 
@@ -555,7 +609,7 @@ export default function Projects() {
                   name="location"
                   value={form.location}
                   onChange={handleChange}
-                  placeholder="e.g. Gurugram, Haryana"
+                  placeholder="e.g. MIDC, Maharashtra"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
 
@@ -643,6 +697,240 @@ export default function Projects() {
                   </option>
 
                 </select>
+
+              </div>
+
+
+              {/* ================= RULES ENGINE DETAILS ================= */}
+
+              <div className="pt-4 border-t border-slate-100">
+
+                <h3 className="text-sm font-semibold text-slate-800 mb-1">
+                  Compliance Details
+                </h3>
+
+                <p className="text-xs text-slate-500 mb-4">
+                  These details are used by the Rules Engine to determine applicable approvals.
+                </p>
+
+
+                {/* Industry */}
+
+                <div className="mb-4">
+
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Industry
+                  </label>
+
+                  <select
+                    required
+                    name="industry"
+                    value={form.industry}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+
+                    <option value="">
+                      Select industry
+                    </option>
+
+                    <option value="Chemicals">
+                      Chemicals
+                    </option>
+
+                    <option value="Food Processing">
+                      Food Processing
+                    </option>
+
+                    <option value="Textiles">
+                      Textiles
+                    </option>
+
+                    <option value="Pharmaceuticals">
+                      Pharmaceuticals
+                    </option>
+
+                    <option value="Automotive">
+                      Automotive
+                    </option>
+
+                    <option value="Other">
+                      Other
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                {/* Project Stage */}
+
+                <div className="mb-4">
+
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Project Stage
+                  </label>
+
+                  <select
+                    required
+                    name="projectStage"
+                    value={form.projectStage}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+
+                    <option value="Pre-establishment">
+                      Pre-establishment
+                    </option>
+
+                    <option value="Pre-operation">
+                      Pre-operation
+                    </option>
+
+                    <option value="Operation">
+                      Operation
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                {/* Location Type */}
+
+                <div className="mb-4">
+
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Location Type
+                  </label>
+
+                  <select
+                    required
+                    name="locationType"
+                    value={form.locationType}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+
+                    <option value="">
+                      Select location type
+                    </option>
+
+                    <option value="MIDC">
+                      MIDC
+                    </option>
+
+                    <option value="Urban">
+                      Urban
+                    </option>
+
+                    <option value="Rural">
+                      Rural
+                    </option>
+
+                    <option value="Both">
+                      Both
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                {/* Hazardous Waste */}
+
+                <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 cursor-pointer mb-2">
+
+                  <input
+                    type="checkbox"
+                    name="generatesHazardousWaste"
+                    checked={form.generatesHazardousWaste}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        generatesHazardousWaste: e.target.checked
+                      })
+                    }
+                    className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  />
+
+                  <div>
+
+                    <p className="text-sm font-medium text-slate-700">
+                      Generates hazardous waste
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Used to determine hazardous waste approvals
+                    </p>
+
+                  </div>
+
+                </label>
+
+
+                {/* Fire Safety */}
+
+                <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 cursor-pointer mb-2">
+
+                  <input
+                    type="checkbox"
+                    name="requiresFireSafety"
+                    checked={form.requiresFireSafety}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        requiresFireSafety: e.target.checked
+                      })
+                    }
+                    className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  />
+
+                  <div>
+
+                    <p className="text-sm font-medium text-slate-700">
+                      Requires fire safety approval
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Used to determine fire safety requirements
+                    </p>
+
+                  </div>
+
+                </label>
+
+
+                {/* Production Started */}
+
+                <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 cursor-pointer">
+
+                  <input
+                    type="checkbox"
+                    name="hasStartedProduction"
+                    checked={form.hasStartedProduction}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        hasStartedProduction: e.target.checked
+                      })
+                    }
+                    className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  />
+
+                  <div>
+
+                    <p className="text-sm font-medium text-slate-700">
+                      Production has started
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Used to determine operational approvals
+                    </p>
+
+                  </div>
+
+                </label>
 
               </div>
 

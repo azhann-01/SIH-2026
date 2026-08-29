@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+
 import {
   ReactFlow,
   Background,
@@ -246,7 +247,17 @@ export default function ApprovalRoadmap() {
       }
 
 
-      const activeProject = projects[0]
+      /*
+       * IMPORTANT:
+       * Select the latest project instead of projects[0].
+       *
+       * Your dashboard contains multiple projects.
+       * The first one is "Condom Industries",
+       * while the latest one is "Chemical Industry".
+       */
+
+      const activeProject =
+        projects[projects.length - 1]
 
       setProject(activeProject)
 
@@ -260,10 +271,103 @@ export default function ApprovalRoadmap() {
           `/application/project/${activeProject.id}`
         )
 
-
-      setApplications(
+      const existingApplications =
         applicationResponse.data || []
-      )
+
+
+      // ================================
+      // RULES ENGINE
+      // ================================
+
+      const rulesResponse =
+        await api.post('/rules/evaluate', {
+
+          industry:
+            activeProject.industry || 'Not Specified',
+
+          projectStage:
+            activeProject.projectStage || 'Not Specified',
+
+          locationType:
+            activeProject.locationType || 'Not Specified',
+
+          generatesHazardousWaste:
+            Boolean(
+              activeProject.generatesHazardousWaste
+            ),
+
+          requiresFireSafety:
+            Boolean(
+              activeProject.requiresFireSafety
+            ),
+
+          hasStartedProduction:
+            Boolean(
+              activeProject.hasStartedProduction
+            ),
+        })
+
+
+      const applicableApprovals =
+        rulesResponse.data?.approvals || []
+
+
+      // ================================
+      // MERGE RULES ENGINE WITH APPLICATIONS
+      // ================================
+
+      const mergedApplications =
+        applicableApprovals.map((approval) => {
+
+          const existing =
+            existingApplications.find(
+              (app) =>
+                app.approvalId === approval.approvalId ||
+                app.approvalName === approval.approvalName
+            )
+
+
+          if (existing) {
+            return existing
+          }
+
+
+          return {
+            id: `rule-${approval.approvalId}`,
+
+            approvalId:
+              approval.approvalId,
+
+            approvalName:
+              approval.approvalName,
+
+            department:
+              approval.department,
+
+            projectStage:
+              approval.projectStage,
+
+            status:
+              approval.status || 'SUBMITTED',
+
+            requiredDocuments:
+              approval.requiredDocuments || [],
+
+            renewalRequired:
+              approval.renewalRequired,
+
+            sourceName:
+              approval.sourceName,
+
+            sourceUrl:
+              approval.sourceUrl,
+          }
+
+        })
+
+
+      setApplications(mergedApplications)
+
 
     } catch (err) {
 
@@ -574,7 +678,6 @@ export default function ApprovalRoadmap() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
 
-
         <div className="rounded-xl border border-primary-100 bg-primary-50 p-4">
 
           <p className="text-2xl font-bold text-primary-600">
@@ -645,7 +748,6 @@ export default function ApprovalRoadmap() {
       {/* Filters */}
 
       <div className="bg-white rounded-xl border border-slate-100 p-4 flex flex-col sm:flex-row gap-3">
-
 
         <div className="relative flex-1">
 
@@ -910,7 +1012,6 @@ export default function ApprovalRoadmap() {
 
 
                 <div className="grid sm:grid-cols-3 gap-3 mt-5">
-
 
                   <div className="p-3 rounded-lg bg-slate-50">
 
