@@ -196,6 +196,8 @@ export default function ApprovalRoadmap() {
   const [applications, setApplications] = useState([])
 
   const [project, setProject] = useState(null)
+  const [projects, setProjects] = useState([])
+  const [selectedProjectId, setSelectedProjectId] = useState('')
 
   const [loading, setLoading] = useState(true)
 
@@ -236,7 +238,7 @@ export default function ApprovalRoadmap() {
 
       const projects =
         dashboardResponse.data?.projects || []
-
+      setProjects(projects)
 
       if (projects.length === 0) {
 
@@ -256,10 +258,23 @@ export default function ApprovalRoadmap() {
        * while the latest one is "Chemical Industry".
        */
 
-      const activeProject =
-        projects[projects.length - 1]
+      const currentProjectId =
+  selectedProjectId || String(projects[projects.length - 1].id)
 
-      setProject(activeProject)
+const activeProject =
+  selectedProjectId
+    ? projects.find(
+        (p) => String(p.id) === String(selectedProjectId)
+      )
+    : projects[projects.length - 1]
+
+if (!activeProject) {
+  setProject(null)
+  setApplications([])
+  return
+}
+
+setProject(activeProject)
 
 
       /*
@@ -389,13 +404,40 @@ export default function ApprovalRoadmap() {
 
     }
   }
+  const submitApprovalApplication = async (approval) => {
+  if (!project?.id) {
+    setError('No project selected.')
+    return
+  }
+
+  try {
+    setRefreshing(true)
+    setError('')
+
+    await api.post(`/application/${project.id}`, {
+      approvalName: approval.approvalName,
+      remarks: `Application submitted for ${approval.approvalName}`,
+    })
+
+    await fetchApplications()
+  } catch (err) {
+    console.error('Failed to submit approval:', err)
+
+    setError(
+      err.response?.data ||
+      'Failed to submit approval application.'
+    )
+  } finally {
+    setRefreshing(false)
+  }
+}
 
 
   useEffect(() => {
 
     fetchApplications()
 
-  }, [user?.id])
+  }, [user?.id, selectedProjectId])
 
 
   const handleRefresh = async () => {
@@ -639,6 +681,24 @@ export default function ApprovalRoadmap() {
 
         </div>
 
+          {/* PROJECT SELECTOR */}
+  <div className="flex items-center gap-2">
+    <label className="text-sm font-medium text-slate-600">
+      Project:
+    </label>
+
+    <select
+      value={selectedProjectId}
+      onChange={(e) => setSelectedProjectId(e.target.value)}
+      className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+    >
+      {projects.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  </div>
 
         <button
           onClick={handleRefresh}
@@ -1065,7 +1125,29 @@ export default function ApprovalRoadmap() {
 
                 </div>
 
+                          {String(selectedApproval.id).startsWith('rule-') &&
+  selectedApproval.status === 'READY' && (
 
+  <div className="mt-5">
+
+    <button
+      onClick={() =>
+        submitApprovalApplication(selectedApproval)
+      }
+      disabled={refreshing}
+      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-60"
+    >
+      {refreshing
+        ? 'Submitting...'
+        : 'Apply for this Approval'}
+    </button>
+
+    <p className="text-xs text-slate-400 mt-2">
+      Submit an application for this required approval.
+    </p>
+
+  </div>
+)}
                 {selectedApproval.remarks && (
 
                   <div className="mt-4 p-3 rounded-lg bg-slate-50">

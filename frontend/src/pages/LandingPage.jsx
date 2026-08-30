@@ -37,7 +37,7 @@ export default function LandingPage() {
               </div>
 
               <span className="font-bold text-slate-800 text-lg">
-                e-Approvals
+                InduSync
               </span>
 
             </div>
@@ -136,12 +136,6 @@ export default function LandingPage() {
           <div className="max-w-3xl">
 
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6">
-
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-
-              <span className="text-xs font-medium text-primary-200">
-                Smart India Hackathon 2025
-              </span>
 
             </div>
 

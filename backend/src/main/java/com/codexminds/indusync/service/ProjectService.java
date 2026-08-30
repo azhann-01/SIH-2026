@@ -20,28 +20,19 @@ public class ProjectService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Project createProject(
-            ProjectRequest request,
-            Long companyId) {
+    public Project createProject(ProjectRequest request, Long companyId) {
 
-        Company company =
-                companyRepository.findById(companyId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Company not found"
-                                ));
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() ->
+                        new RuntimeException("Company not found"));
 
         Project project = new Project();
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
         project.setLocation(request.getLocation());
-        project.setInvestmentAmount(
-                request.getInvestmentAmount()
-        );
-        project.setNumberOfEmployees(
-                request.getNumberOfEmployees()
-        );
+        project.setInvestmentAmount(request.getInvestmentAmount());
+        project.setNumberOfEmployees(request.getNumberOfEmployees());
         project.setLandType(request.getLandType());
 
         // Rules Engine fields
@@ -50,21 +41,15 @@ public class ProjectService {
         project.setLocationType(request.getLocationType());
 
         project.setGeneratesHazardousWaste(
-                Boolean.TRUE.equals(
-                        request.getGeneratesHazardousWaste()
-                )
+                Boolean.TRUE.equals(request.getGeneratesHazardousWaste())
         );
 
         project.setRequiresFireSafety(
-                Boolean.TRUE.equals(
-                        request.getRequiresFireSafety()
-                )
+                Boolean.TRUE.equals(request.getRequiresFireSafety())
         );
 
         project.setHasStartedProduction(
-                Boolean.TRUE.equals(
-                        request.getHasStartedProduction()
-                )
+                Boolean.TRUE.equals(request.getHasStartedProduction())
         );
 
         project.setCompany(company);
@@ -72,18 +57,13 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public List<Project> getProjectsByCompany(
-            Long companyId) {
-
+    public List<Project> getProjectsByCompany(Long companyId) {
         return projectRepository.findByCompanyId(companyId);
     }
 
     public Project getProjectById(Long id) {
-
         return projectRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Project not found"
-                        ));
+                        new RuntimeException("Project not found"));
     }
 }

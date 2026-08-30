@@ -1,14 +1,16 @@
 package com.codexminds.indusync.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.codexminds.indusync.dto.ApplicationRequest;
 import com.codexminds.indusync.entity.Application;
 import com.codexminds.indusync.entity.Project;
 import com.codexminds.indusync.repository.ApplicationRepository;
 import com.codexminds.indusync.repository.ProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ApplicationService {
@@ -45,5 +47,9 @@ public class ApplicationService {
         Application app = getApplicationById(id);
         app.setStatus(Application.Status.valueOf(status));
         return applicationRepository.save(app);
+    }
+
+    public List<Application> getAllApplications() {
+        return applicationRepository.findAll();
     }
 }

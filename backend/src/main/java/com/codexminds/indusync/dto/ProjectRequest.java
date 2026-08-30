@@ -16,7 +16,7 @@ public class ProjectRequest {
     private String industry;
     private String projectStage;
     private String locationType;
-    private Boolean generatesHazardousWaste;
-    private Boolean requiresFireSafety;
-    private Boolean hasStartedProduction;
+    private Boolean generatesHazardousWaste = false;
+    private Boolean requiresFireSafety = false;
+    private Boolean hasStartedProduction = false;
 }

@@ -100,7 +100,7 @@ export default function Dashboard() {
   // DATA
   // =========================
   const company = dashboard.companies?.[0]
-  const activeProject = dashboard.projects?.[0]
+  const activeProject = dashboard.projects?.[dashboard.projects.length-1]
 
   const applications = dashboard.applications || []
   const compliances = dashboard.compliances || []

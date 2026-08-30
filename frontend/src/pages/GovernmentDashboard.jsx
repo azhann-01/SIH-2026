@@ -132,6 +132,10 @@ export default function GovernmentDashboard() {
     rejected: 0,
     activeApplicants: 0,
   })
+  const [applications, setApplications] = useState([])
+  const [applicationsLoading, setApplicationsLoading] = useState(true)
+  const [applicationError, setApplicationError] = useState('')
+  const [updatingApplication, setUpdatingApplication] = useState(null)
 
 
   /* =========================
@@ -172,6 +176,48 @@ export default function GovernmentDashboard() {
 
     }
   }
+  const fetchApplications = async () => {
+  try {
+    setApplicationsLoading(true)
+    setApplicationError('')
+
+    const response = await api.get('/application/all')
+
+    setApplications(response.data || [])
+  } catch (error) {
+    console.error('Failed to fetch applications:', error)
+    setApplicationError('Unable to load applications.')
+  } finally {
+    setApplicationsLoading(false)
+  }
+}
+
+const updateApplicationStatus = async (id, status) => {
+  try {
+    setUpdatingApplication(id)
+    setApplicationError('')
+
+    await api.patch(
+      `/application/${id}/status`,
+      null,
+      {
+        params: { status }
+      }
+    )
+
+    await fetchApplications()
+    await fetchDashboardData()
+  } catch (error) {
+    console.error('Failed to update application:', error)
+
+    setApplicationError(
+      error.response?.data ||
+      'Unable to update application status.'
+    )
+  } finally {
+    setUpdatingApplication(null)
+  }
+}
 
 
   /* =========================
@@ -181,6 +227,7 @@ export default function GovernmentDashboard() {
   useEffect(() => {
 
     fetchDashboardData()
+    fetchApplications()
 
   }, [])
 
@@ -1188,7 +1235,198 @@ export default function GovernmentDashboard() {
         </div>
 
       </div>
+                    {/* =========================
+          APPLICATIONS FOR REVIEW
+          ========================= */}
 
+      <div className="bg-white rounded-xl border border-slate-100">
+
+        <div className="p-5 border-b border-slate-100">
+          <h3 className="font-semibold text-slate-900">
+            Applications for Review
+          </h3>
+
+          <p className="text-xs text-slate-400 mt-0.5">
+            Review and process submitted approval applications
+          </p>
+        </div>
+
+        {applicationError && (
+          <div className="mx-5 mt-4 bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+            {applicationError}
+          </div>
+        )}
+
+        {applicationsLoading ? (
+          <div className="p-8 text-center text-sm text-slate-500">
+            Loading applications...
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="p-8 text-center text-sm text-slate-500">
+            No applications found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+
+            <table className="w-full text-sm">
+
+              <thead>
+                <tr className="bg-slate-50">
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Application
+                  </th>
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Project
+                  </th>
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Approval
+                  </th>
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Status
+                  </th>
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Submitted
+                  </th>
+
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+                    Action
+                  </th>
+
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-50">
+
+                {applications.map((application) => (
+
+                  <tr
+                    key={application.id}
+                    className="hover:bg-slate-50/50"
+                  >
+
+                    <td className="px-5 py-4 font-medium text-slate-900">
+                      #{application.id}
+                    </td>
+
+                    <td className="px-5 py-4 text-slate-600">
+                      #{application.projectId}
+                    </td>
+
+                    <td className="px-5 py-4 text-slate-700">
+                      {application.approvalName}
+                    </td>
+
+                    <td className="px-5 py-4">
+
+                      <span
+                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+                          application.status === 'APPROVED'
+                            ? 'bg-green-50 text-green-700'
+                            : application.status === 'REJECTED'
+                              ? 'bg-red-50 text-red-700'
+                              : application.status === 'IN_REVIEW'
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'bg-amber-50 text-amber-700'
+                        }`}
+                      >
+                        {application.status}
+                      </span>
+
+                    </td>
+
+                    <td className="px-5 py-4 text-slate-600">
+                      {application.submittedAt
+                        ? new Date(
+                            application.submittedAt
+                          ).toLocaleDateString()
+                        : '—'}
+                    </td>
+
+                    <td className="px-5 py-4">
+
+                      <div className="flex flex-wrap gap-2">
+
+                        {application.status === 'SUBMITTED' && (
+                          <button
+                            onClick={() =>
+                              updateApplicationStatus(
+                                application.id,
+                                'IN_REVIEW'
+                              )
+                            }
+                            disabled={
+                              updatingApplication === application.id
+                            }
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+                          >
+                            In Review
+                          </button>
+                        )}
+
+                        {(application.status === 'SUBMITTED' ||
+                          application.status === 'IN_REVIEW') && (
+                          <>
+                            <button
+                              onClick={() =>
+                                updateApplicationStatus(
+                                  application.id,
+                                  'APPROVED'
+                                )
+                              }
+                              disabled={
+                                updatingApplication === application.id
+                              }
+                              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-50"
+                            >
+                              Approve
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                updateApplicationStatus(
+                                  application.id,
+                                  'REJECTED'
+                                )
+                              }
+                              disabled={
+                                updatingApplication === application.id
+                              }
+                              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {(application.status === 'APPROVED' ||
+                          application.status === 'REJECTED') && (
+                          <span className="text-xs text-slate-400">
+                            Processed
+                          </span>
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+        )}
+
+      </div>
+      
     </div>
   )
 }
