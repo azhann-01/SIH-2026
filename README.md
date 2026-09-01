@@ -3,7 +3,7 @@
 ### InduSync -- Intelligent Industrial Approval, Compliance & Regulatory Assistance Platform
 
 
-```html
+
 <p align="center">
   <b>Smart India Hackathon 2026</b><br>
   Streamlining industrial approvals, compliance processes, and access to government support services
