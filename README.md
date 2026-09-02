@@ -688,6 +688,10 @@ applicant status update**.
 
 # 🖥️ Screenshots
 
+### Landing Page
+
+![Landing Page](./screenshots/landing-page.png)
+
 ### Applicant Dashboard
 
 ![Applicant Dashboard](./screenshots/applicant-dashboard.png)
