@@ -595,35 +595,37 @@ implemented foundation.
 
 ------------------------------------------------------------------------
 
-# 📊 Existing Approach vs InduSync
+## 📊 Existing Approach vs InduSync
 
-  -----------------------------------------------------------------------
-  Existing Approach                   InduSync
-  ----------------------------------- -----------------------------------
-  Manual approval discovery           Project-specific rule evaluation
+InduSync improves the industrial approval journey by combining project-specific regulatory evaluation, centralized application management, approval dependency visualization and applicant–government workflow into a single platform.
 
-  Scattered information               Centralized platform
+| Existing Approach | InduSync |
+|---|---|
+| Manual identification of applicable approvals | **Project-specific rule-based approval identification** |
+| Regulatory information distributed across multiple sources | **Centralized platform for approvals, compliance and applications** |
+| Generic regulatory information | **Compliance-profile and project-attribute driven requirements** |
+| Limited visibility of approval dependencies | **Visual approval roadmap with dependency tracking** |
+| Application tracking handled separately | **Integrated application lifecycle management** |
+| Limited applicant–government interaction | **Connected Applicant + Government workflows** |
+| Static or fragmented status tracking | **Database-backed real-time application status** |
+| Difficult to understand project-level requirements | **Project-specific compliance journey** |
+| Approval requirements determined manually | **Deterministic Rules Engine evaluates regulatory conditions** |
+| Limited centralized visibility for government authorities | **Government dashboard for application review and processing** |
+| AI, where used, may be treated as a decision-maker | **AI/RAG designed as a separate assistive intelligence layer** |
 
-  Generic regulatory information      Compliance-profile-driven
-                                      requirements
+### 🚀 Key Differentiation
 
-  Limited dependency visibility       Visual approval roadmap
+**InduSync does not replace regulatory decision-making with AI.**
 
-  Separate application tracking       Integrated application lifecycle
+The core approval determination is handled by a **deterministic Rules Engine**, making the system predictable, explainable and auditable.
 
-  Limited applicant-government        Applicant + Government dashboards
-  interaction                         
+The planned **AI/RAG layer** will work alongside the Rules Engine to provide regulatory document retrieval, contextual explanations, compliance assistance and document intelligence without becoming the authoritative decision-maker.
 
-  Static status tracking              Database-backed status updates
+### 🔮 Future Intelligence Layer
 
-  Difficult project-level visibility  Project-specific compliance journey
+`Regulatory Documents → Knowledge Base → RAG → AI Regulatory Assistant`
 
-  AI as core decision maker           Deterministic Rules Engine for core
-                                      decisions
-
-  Future intelligence added           AI/RAG designed as an extensible
-  separately                          layer
-  -----------------------------------------------------------------------
+This architecture allows AI capabilities to be added incrementally without changing the core approval workflow or Rules Engine.
 
 ------------------------------------------------------------------------
 
