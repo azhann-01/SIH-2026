@@ -177,46 +177,33 @@ The following architecture represents the current InduSync implementation along 
 
 ------------------------------------------------------------------------
 
-# 🛠️ Complete Technology Stack
+## 🛠️ Technology Stack
 
-  -----------------------------------------------------------------------
-  Layer                   Technologies            Purpose
-  ----------------------- ----------------------- -----------------------
-  Frontend                React, Vite             Interactive web
-                                                  application
+| Layer | Technologies | Purpose |
+|---|---|---|
+| **Frontend** | React, Vite, Tailwind CSS, React Router, React Flow, Lucide React | Responsive applicant and government dashboards, project management, application tracking, approval roadmap and workflow visualization |
+| **Backend** | Java, Spring Boot, Spring Web, Spring Data JPA, Hibernate | REST APIs, business logic, project/application management and workflow processing |
+| **Database** | MySQL | Persistent storage for users, companies, projects, applications, approvals, documents and regulatory data |
+| **Authentication & Security** | JWT, Spring Security | Secure authentication, authorization and role-based access for applicants and government officers |
+| **Rules & Compliance Engine** | Java, Spring Boot, JSON-based Rules Engine | Determines applicable approvals and compliance requirements based on project characteristics |
+| **Document Management** | Spring Boot REST APIs, MySQL | Application document handling, metadata management and verification workflow |
+| **Workflow & Approval Management** | Spring Boot, REST APIs, React Flow | Approval lifecycle, dependency visualization, application status tracking and government review workflow |
+| **Government Dashboard** | React, Tailwind CSS, Spring Boot REST APIs | Application review, document verification, approval/rejection and compliance monitoring |
+| **Analytics & Visualization** | Recharts, React | Approval statistics, project insights and government analytics |
+| **API Communication** | REST APIs, Axios | Communication between frontend, backend and application modules |
+| **Development & Version Control** | Git, GitHub, VS Code | Source-code management, team collaboration and version control |
 
-  UI                      Tailwind CSS            Responsive enterprise
-                                                  interface
+### 🔮 Planned AI & Intelligence Layer
 
-  API Communication       Axios                   REST communication
+AI/RAG is planned as a future enhancement to extend InduSync beyond deterministic rule-based compliance processing.
 
-  Approval Visualization  React Flow              Approval dependency
-                                                  roadmap
-
-  Analytics               Recharts                Dashboard analytics
-
-  Backend                 Java, Spring Boot       REST APIs and business
-                                                  logic
-
-  Persistence             Spring Data JPA         Database access
-
-  ORM                     Hibernate               Object-relational
-                                                  mapping
-
-  Database                MySQL                   Persistent application
-                                                  data
-
-  Security                Spring Security, JWT    Authentication and
-                                                  role-based access
-
-  Regulatory Logic        Java Rules Engine +     Project-specific
-                          JSON                    approval identification
-
-  Architecture            REST                    Frontend/backend
-                                                  integration
-
-  Development             Git, GitHub, VS Code /  Development and
-                          IntelliJ                collaboration
+| Component | Planned Technology | Purpose |
+|---|---|---|
+| **Document Intelligence** | OCR + LLM | Extract information from regulatory documents and uploaded applications |
+| **Regulatory Knowledge Base** | Vector Database | Store and retrieve relevant acts, rules, circulars and guidelines |
+| **RAG Pipeline** | Embeddings + RAG + LLM | Provide context-aware regulatory answers with source-based retrieval |
+| **Compliance Assistant** | LLM + RAG | Explain applicable requirements and assist users in understanding regulations |
+| **Document Mismatch Detection** | NLP/LLM | Identify inconsistencies between submitted documents and application information |
   -----------------------------------------------------------------------
 
 ------------------------------------------------------------------------
