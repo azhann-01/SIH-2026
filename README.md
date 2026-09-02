@@ -164,39 +164,11 @@ Conditional example:
 
 ------------------------------------------------------------------------
 
-# 🏗️ System Architecture
+## 🏛️ System Architecture
 
-``` text
-┌──────────────────────────────────────────────────────────┐
-│                     React Frontend                       │
-│                                                          │
-│ Applicant Dashboard │ Projects │ Roadmap │ Applications │
-│ Government Dashboard │ Analytics │ Authentication        │
-└────────────────────────────┬─────────────────────────────┘
-                             │ REST API
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                  Spring Boot Backend                     │
-│                                                          │
-│ Controllers │ Services │ Security │ Rules Engine        │
-│ Application Workflow │ Project Management                │
-└────────────────────────────┬─────────────────────────────┘
-                             │ JPA / Hibernate
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                         MySQL                            │
-│                                                          │
-│ Companies │ Projects │ Applications │ Approvals         │
-│ Users │ Compliance / Regulatory Records                  │
-└──────────────────────────────────────────────────────────┘
+The following architecture represents the current InduSync implementation along with planned future upgrades.
 
-                     Future Intelligence Layer
-                             │
-                             ▼
-             AI / RAG Regulatory Assistance
-       Document Intelligence │ Knowledge Retrieval
-       Regulatory Assistant │ Compliance Assistant
-```
+![InduSync System Architecture](docs/architecture/InduSync_System_Architecture.png)
 
 > **Implementation note:** The current prototype's core workflow is
 > powered by the Rules Engine and relational database. AI/RAG is a
