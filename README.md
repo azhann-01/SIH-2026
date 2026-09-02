@@ -235,13 +235,11 @@ Protected Resources
 
 ### Roles
 
-``` text
+``` .
                  ┌── Applicant
 User ── Login ───┤
                  └── Government
 ```
-                       ```---------------------------------------
-                       ```
 ### Role Access
 
 | Feature / Module | Applicant | Government Officer |
@@ -902,20 +900,16 @@ foundation.
 
 ------------------------------------------------------------------------
 
-# 👥 Team CodeXMinds
+## 👥 Team CodeXMinds
 
-  Member     Responsibility
-  ---------- ------------------------------------------
-  Member 1   Project Lead / Full-Stack Integration
-  Member 2   Frontend Development
-  Member 3   Backend Development
-  Member 4   Rules Engine / Compliance Logic
-  Member 5   Government Workflow / Application Module
-  Member 6   UI, Testing & Integration
-
-> Replace these with your actual member names and responsibilities
-> before publishing.
-
+| Member | Responsibility |
+|---|---|
+| **Priyanka — Research, Documentation & Presentation** | Problem-statement research, regulatory and domain research, competitor/existing-system analysis, solution validation, technical documentation, PPT preparation, demo planning and presentation coordination |
+| **Manish — Backend & Database** | Spring Boot backend, MySQL, REST APIs, JPA/Hibernate, JWT authentication, authentication/user, company, project, application, approval, document, compliance, scheme, dashboard and notification APIs |
+| **Deepak — Frontend & UI/UX** | React, Tailwind CSS, Axios, Recharts and React Flow; investor portal, company/project pages, approval roadmap, approval details, document status, compliance, government schemes and AI assistant UI |
+| **Divyanshu — AI / RAG / Document Intelligence** | Python, FastAPI, LLM APIs, RAG, embeddings, vector database and OCR/PDF extraction; regulatory assistant, compliance assistant, document intelligence and document mismatch detection |
+| **Yug — Regulatory Data & Rules Engine** | Regulatory dataset, approval eligibility, required documents, dependencies, processing stages, SLA, renewal, risk factors, official sources, Rules Engine, compliance rules and scheme eligibility |
+| **Azhan — Team Leader + Full Integration + Government Intelligence Dashboard** | API/AI/Rules integration, error handling, end-to-end testing, deployment, environment configuration, Government Dashboard, analytics, bottleneck detection and SLA monitoring |
 ------------------------------------------------------------------------
 
 # 📜 Smart India Hackathon 2026
@@ -934,11 +928,8 @@ prototype by Team CodeXMinds.
 
 ------------------------------------------------------------------------
 
-```{=html}
+
 <p align="center">
-```
-`<b>`{=html}InduSync --- Making Industrial Compliance Simpler, Traceable
-and Project-Aware.`</b>`{=html}
-```{=html}
+<b>InduSync --- Making Industrial Compliance Simpler, Traceable
+and Project-Aware.</b>
 </p>
-```
