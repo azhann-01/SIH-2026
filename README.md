@@ -688,8 +688,6 @@ applicant status update**.
 
 # 🖥️ Screenshots
 
-Create a `docs/screenshots/` folder and add the actual screenshots.
-
 ### Applicant Dashboard
 
 ``` text
