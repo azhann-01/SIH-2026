@@ -208,19 +208,30 @@ AI/RAG is planned as a future enhancement to extend InduSync beyond deterministi
 
 ------------------------------------------------------------------------
 
-# 🔐 Security Architecture
+## 🔐 Security Architecture
 
-``` text
-User Login
-    ↓
-Backend Authentication
-    ↓
-JWT Token
-    ↓
+InduSync uses JWT-based authentication with role-based authorization to secure access to platform resources.
+
+### Authentication Flow
+
+```text
+User
+  ↓
+Login / Registration
+  ↓
+Spring Boot Authentication API
+  ↓
+Credential Validation
+  ↓
+JWT Token Generation
+  ↓
 Authenticated API Requests
-    ↓
-Role-based Authorization
-```
+  ↓
+JWT Validation
+  ↓
+Role-Based Authorization
+  ↓
+Protected Resources
 
 ### Roles
 
@@ -229,6 +240,28 @@ Role-based Authorization
 User ── Login ───┤
                  └── Government
 ```
+                       ```---------------------------------------
+                       ```
+### Role Access
+
+| Feature / Module | Applicant | Government Officer |
+|---|:---:|:---:|
+| Register / Login | ✅ | ✅ |
+| Manage Profile | ✅ | ❌ |
+| Create & Manage Projects | ✅ | ❌ |
+| View Applicable Approvals | ✅ | ❌ |
+| Submit Applications | ✅ | ❌ |
+| Upload Application Documents | ✅ | ❌ |
+| Track Application Status | ✅ | ❌ |
+| View Approval Roadmap | ✅ | ❌ |
+| Receive Notifications | ✅ | ✅ |
+| Government Dashboard | ❌ | ✅ |
+| View Submitted Applications | ❌ | ✅ |
+| Verify Documents | ❌ | ✅ |
+| Approve / Reject Applications | ❌ | ✅ |
+| Add Remarks | ❌ | ✅ |
+| Compliance Monitoring | ❌ | ✅ |
+| Reports & Analytics | ❌ | ✅ |
 
 The role determines which workflow and protected APIs the user can
 access.
