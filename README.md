@@ -823,22 +823,42 @@ Use environment/configuration files and include sensitive files in
 
 ------------------------------------------------------------------------
 
-# 🧭 Development Roadmap
+## 🧭 Development Roadmap
 
-  Phase   Module                                 Status
-  ------- -------------------------------------- --------------
-  1       Frontend foundation                    ✅ Completed
-  2       Spring Boot backend                    ✅ Completed
-  3       MySQL + JPA persistence                ✅ Completed
-  4       Authentication + role-based workflow   ✅ Completed
-  5       Project management                     ✅ Completed
-  6       Rules Engine                           ✅ Completed
-  7       Approval Roadmap                       ✅ Completed
-  8       Application workflow                   ✅ Completed
-  9       Government Dashboard                   ✅ Completed
-  10      Dashboard analytics                    ✅ Completed
-  11      AI/RAG regulatory intelligence         🔄 Proposed
-  12      Production deployment                  🔄 Future
+The development of **InduSync** is structured into progressive phases, covering the core platform, regulatory intelligence, government workflow, and future AI capabilities.
+
+| Phase | Module | Status | Key Deliverables |
+|---|---|---|---|
+| **1** | **Frontend Foundation** | ✅ Completed | React-based application structure, responsive UI, navigation, reusable components, Tailwind CSS styling and core applicant interfaces |
+| **2** | **Spring Boot Backend** | ✅ Completed | REST API architecture, controllers, services, repositories, business logic and backend integration |
+| **3** | **MySQL + JPA Persistence** | ✅ Completed | MySQL database integration, JPA/Hibernate entities, repositories, relationships and persistent storage for companies, projects, applications and approvals |
+| **4** | **Authentication & Role-Based Workflow** | ✅ Completed | User authentication, JWT-based security, role-based access control and separate Applicant/Government workflows |
+| **5** | **Project Management** | ✅ Completed | Project creation and management, project-specific information, company-project association and project status tracking |
+| **6** | **Regulatory Rules Engine** | ✅ Completed | Rule-based approval identification, eligibility conditions, required documents, approval dependencies, project-stage evaluation and compliance logic |
+| **7** | **Approval Roadmap** | ✅ Completed | Dynamic approval roadmap, project-specific applicable approvals, application status tracking, approval details and visual workflow |
+| **8** | **Application Workflow** | ✅ Completed | Application creation, submission, document handling, application status transitions and applicant-government workflow integration |
+| **9** | **Government Dashboard** | ✅ Completed | Government-side application management, application review, approval/rejection workflow, remarks and government operational view |
+| **10** | **Dashboard Analytics** | ✅ Completed | Approval statistics, application status summaries, project-level insights and government dashboard analytics |
+| **11** | **AI/RAG Regulatory Intelligence** | 🔄 Proposed | Regulatory document intelligence, RAG-based information retrieval, AI-powered compliance assistance, document understanding and regulatory guidance |
+| **12** | **Production Deployment & Scaling** | 🔄 Future | Cloud deployment, production infrastructure, HTTPS, scalability, monitoring, reliability and production-grade security |
+
+### 📌 Phase Progress
+
+#### ✅ Completed — Core Platform
+
+The current prototype has completed the primary application workflow:
+
+**Frontend → Backend → Database → Authentication → Projects → Rules Engine → Approval Roadmap → Applications → Government Dashboard → Analytics**
+
+These modules form the functional foundation of InduSync and demonstrate the complete applicant-to-government workflow.
+
+#### 🔄 Proposed — AI/RAG Intelligence
+
+The AI/RAG layer is planned as an enhancement to the existing Rules Engine. It will provide intelligent regulatory document retrieval, contextual explanations, compliance assistance and document-level intelligence while the deterministic Rules Engine continues to handle structured approval eligibility.
+
+#### 🔮 Future — Production Deployment
+
+The final phase focuses on transforming the prototype into a production-ready platform through cloud deployment, scalable infrastructure, HTTPS, monitoring, performance optimization and stronger operational security.
 
 ------------------------------------------------------------------------
 
