@@ -690,19 +690,19 @@ applicant status update**.
 
 ### Applicant Dashboard
 
-![Applicant Dashboard](docs/screenshots/applicant-dashboard.png)
+![Applicant Dashboard](./screenshots/applicant-dashboard.png)
 
 ### Projects
 
-![Project Management](docs/screenshots/projects.png)
+![Project Management](./screenshots/projects.png)
 
 ### Approval Roadmap
 
-![Approval Roadmap](docs/screenshots/approval-roadmap.png)
+![Approval Roadmap](./screenshots/approval-roadmap.png)
 
 ### Government Dashboard
 
-![Government Dashboard](docs/screenshots/government-dashboard.png)
+![Government Dashboard](./screenshots/government-dashboard.png)
 
 ------------------------------------------------------------------------
 
